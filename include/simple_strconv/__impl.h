@@ -32,11 +32,23 @@ namespace detail {
 // Given an alphanumeric \a digit, returns its numeric equivalent. For example,
 // '3' becomes 3, 'c' becomes 12, 'E' becomes 14, etc. Errors are signaled via
 // return values larger than kMaxBase.
-uint GetNumberFromDigit(char digit);
+inline uint GetNumberFromDigit(char digit) {
+    // If the digit is less than '0', the return value will wrap around, which
+    // is fine since callers that care about errors are checking that
+    // |GetNumberFromDigit() < base| anyway.
+    if (digit <= '9')
+        return digit - '0';
+    // XXX: Try to explain this at some point.
+    return ((digit - 1) | (1 << 5)) - ('a' - 1) + 10;
+}
 
 // Given a \a number, returns its lower-case ASCII representation. For example,
 // 3 becomes '3', 12 becomes 'c', 14 becomes 'e', etc.
-char GetDigitFromNumber(uint number);
+inline char GetDigitFromNumber(uint number) {
+    if (number < 10)
+        return '0' + number;
+    return 'a' - 10 + number;
+}
 
 // Determines the base, sign, and starting position of \a str.
 bool FixupAndClassifyString(const char*& str, uint& base);
