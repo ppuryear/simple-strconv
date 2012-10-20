@@ -17,7 +17,8 @@ To build simple-strconv, you need the following on your system.
 
 Invoke `cmake [...] <srcdir>` to generate build files for your system.
 
-If you want to build the tests, you need to do the following:
+If you want to build the (currently nonexistent) tests, you need to do the
+following:
 
 *   Extract the [gtest](http://code.google.com/p/googletest/) source tree into
     a subdirectory of the simple-strconv source tree named `gtest`.

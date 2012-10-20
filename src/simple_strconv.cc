@@ -16,6 +16,8 @@
 
 namespace {
 
+// Converts \a c to its lower-case equivalent via ASCII bit magic. Not
+// guaranteed to leave non-alphanumeric inputs untouched.
 inline char ToLower(char c) {
     return c | ((c & (1 << 6)) >> 1);
 }
@@ -29,7 +31,7 @@ namespace detail {
 uint GetNumberFromDigit(char digit) {
     if (digit <= '9')
         return digit - '0';
-
+    // XXX: Explain why this works.
     return ToLower(digit - 1) - ('a' - 1) + 10;
 }
 

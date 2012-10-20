@@ -29,16 +29,27 @@ const uint kMaxBase = 16;
 
 namespace detail {
 
+// Given an alphanumeric \a digit, returns its numeric equivalent. For example,
+// '3' becomes 3, 'c' becomes 12, 'E' becomes 14, etc. Errors are signaled via
+// return values larger than kMaxBase.
 uint GetNumberFromDigit(char digit);
+
+// Given a \a number, returns its lower-case ASCII representation. For example,
+// 3 becomes '3', 12 becomes 'c', 14 becomes 'e', etc.
 char GetDigitFromNumber(uint number);
+
+// Determines the base, sign, and starting position of \a str.
 bool FixupAndClassifyString(const char*& str, uint& base);
 
-}
+} // namespace detail
 
 #define SS_CHECK_INT_PARAM(T) \
     static_assert(std::is_integral<T>::value, \
             "parameter `T' must be an integral type");
 
+// Converts \a str to an integer of type \a T.
+// The semantics of this function are identical to those of the C-style
+// variants documented in simple_strconv.h.
 template<typename T>
 int StringToInt(T *result, const char* str, uint base = 0) {
     SS_CHECK_INT_PARAM(T);
@@ -80,6 +91,13 @@ int StringToInt(T *result, const char* str, uint base = 0) {
     return 0;
 }
 
+// Converts the given integer \a value into an ASCII string in the given
+// \a base. The buffer pointed to by \a str must be sufficiently large to
+// hold the result (the maximum possible output size is
+// CHAR_BIT * sizeof(T) + 2, including the terminating NUL character).
+//
+// \return The length of the string produced, not including the terminating
+//         NUL.
 template<typename T>
 int IntToCString(char* str, T value, uint base = 10) {
     SS_CHECK_INT_PARAM(T);
@@ -121,6 +139,7 @@ int IntToCString(char* str, T value, uint base = 10) {
     return length;
 }
 
+// Converts the given integer \a value into a std::string in the given \a base.
 template<typename T>
 std::string IntToString(T value, uint base = 10) {
     // Maximum-length output:

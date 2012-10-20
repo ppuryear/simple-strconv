@@ -13,6 +13,48 @@
  * limitations under the License.
  */
 
+/**
+ * simple_strconv.h - public interface to the simple-strconv library
+ *
+ * This library has two interfaces: a C-style function interface and a
+ * C++-style template interface. In C programs, only the C interface is
+ * available (obviously). In C++ programs, either interface can be used.
+ *
+ * C Interface:
+ *   The C interface consists of functions with the following signature:
+ *     int simple_strtoX(T *result, const char *str, unsigned int base);
+ *   where T is the result type (e.g. 'int') and X is a short name for that
+ *   type (e.g. 'i'). See the SS_DECLARE_STRTOINT_FUNC() macros at the bottom
+ *   of this file to learn which types are available.
+ *
+ *   The input string may be any alphanumeric ASCII string, possibly with a
+ *   leading prefix to indicate the radix. Leading whitespace and interstitial
+ *   punctuation are prohibited. Valid examples (with the base in parentheses):
+ *     "4096" (10), "0x1337face" (16), "101010" (2), "0755" (8), "DEADBEEF" (16)
+ *   Invalid examples:
+ *     "  3" (10), "1,000,000" (10), "0xlivebeef" (16), "42u" (10)
+ *
+ *   The base may be any number in the range [2, 16]. Characters are
+ *   interpreted the standard way, e.g. '3' => 3, 'a' => 10, 'C' => 12 , etc.
+ *   The base may also be 0, in which case the function will try to determine
+ *   the radix based on a prefix, viz.:
+ *     "0b" or "0B"  => base 2
+ *     "0"           => base 8
+ *     "0x" or "0X"  => base 16
+ *     anything else => base 10
+ *
+ *   The return value is a standard error code. 0 indicates a successful
+ *   conversion, anything less than zero indicates a failure. Currently,
+ *   the following error codes are returned:
+ *     -EINVAL: The input string contains characters that cannot be converted,
+ *              or the supplied base is not supported.
+ *     -ERANGE: The input string is valid but represents a number too large or
+ *              small to fit in the requested type.
+ *
+ * C++ Interface:
+ *   The C++ interface is documented in the header file __impl.h.
+ */
+
 #ifndef SIMPLE_STRCONV_H_
 #define SIMPLE_STRCONV_H_
 
