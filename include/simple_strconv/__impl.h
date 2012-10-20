@@ -97,7 +97,7 @@ int StringToInt(T *result, const char* str, uint base = 0) {
 // CHAR_BIT * sizeof(T) + 2, including the terminating NUL character).
 //
 // \return The length of the string produced, not including the terminating
-//         NUL.
+//         NUL, or -EINVAL if \a base is unsupported.
 template<typename T>
 int IntToCString(char* str, T value, uint base = 10) {
     SS_CHECK_INT_PARAM(T);
@@ -140,6 +140,8 @@ int IntToCString(char* str, T value, uint base = 10) {
 }
 
 // Converts the given integer \a value into a std::string in the given \a base.
+// \return A string representation of \a value, or an empty string if \a base
+//         is unsupported.
 template<typename T>
 std::string IntToString(T value, uint base = 10) {
     // Maximum-length output:

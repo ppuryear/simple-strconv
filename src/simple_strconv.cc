@@ -16,22 +16,34 @@
 
 namespace {
 
-// Converts \a c to its lower-case equivalent via ASCII bit magic. Not
-// guaranteed to leave non-alphanumeric inputs untouched.
+// Converts \a c to its lower-case equivalent via ASCII bit magic.
+// Specifically, all characters of the form "10xxxxx" are converted to
+// "11xxxxx". This has a few side-effects, e.g. '@' becomes '`'.
 inline char ToLower(char c) {
     return c | ((c & (1 << 6)) >> 1);
 }
 
-}
+} // namespace
 
 namespace simple_strconv {
 
 namespace detail {
 
 uint GetNumberFromDigit(char digit) {
+    // If the digit is less than '0', the return value will wrap around, which
+    // is fine since callers that care about errors are checking that
+    // |GetNumberFromDigit() < base| anyway.
     if (digit <= '9')
         return digit - '0';
-    // XXX: Explain why this works.
+
+    // To get proper wrap-around, we need to ensure that all invalid inputs are
+    // at least 10 less than 'a'. If we did
+    //     return ToLower(digit) - 'a' + 10
+    // then we'd be correct for all inputs *except* '@' and '`' due to the
+    // behavior of ToLower() (ToLower('@') == '`', which is 1 less than 'a').
+    //
+    // To fix this, we need to subtract 1 from the whole ASCII table so that
+    // '@' and '`' get munged into chars greater than 'z' by ToLower().
     return ToLower(digit - 1) - ('a' - 1) + 10;
 }
 

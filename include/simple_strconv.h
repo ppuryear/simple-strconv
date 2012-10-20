@@ -44,15 +44,15 @@
  *     anything else => base 10
  *
  *   The return value is a standard error code. 0 indicates a successful
- *   conversion, anything less than zero indicates a failure. Currently,
- *   the following error codes are returned:
+ *   conversion, and anything less than zero indicates a failure. The following
+ *   error codes are used:
  *     -EINVAL: The input string contains characters that cannot be converted,
  *              or the supplied base is not supported.
  *     -ERANGE: The input string is valid but represents a number too large or
  *              small to fit in the requested type.
  *
  * C++ Interface:
- *   The C++ interface is documented in the header file __impl.h.
+ *   The C++ interface is documented in the file __impl.h.
  */
 
 #ifndef SIMPLE_STRCONV_H_
