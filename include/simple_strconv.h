@@ -22,7 +22,7 @@
  *
  * C Interface:
  *   The C interface consists of functions with the following signature:
- *     int simple_strtoX(T *result, const char *str, unsigned int base);
+ *     int simple_strtoX(T *result, const char *str, unsigned int base)
  *   where T is the result type (e.g. 'int') and X is a short name for that
  *   type (e.g. 'i'). See the SS_DECLARE_STRTOINT_FUNC() macros at the bottom
  *   of this file to learn which types are available.
@@ -34,7 +34,7 @@
  *   Invalid examples:
  *     "  3" (10), "1,000,000" (10), "0xlivebeef" (16), "42u" (10)
  *
- *   The base may be any number in the range [2, 16]. Characters are
+ *   The base may be any number in the range [2, 36]. Characters are
  *   interpreted the standard way, e.g. '3' => 3, 'a' => 10, 'C' => 12 , etc.
  *   The base may also be 0, in which case the function will try to determine
  *   the radix based on a prefix, viz.:
@@ -52,7 +52,11 @@
  *              small to fit in the requested type.
  *
  * C++ Interface:
- *   The C++ interface is documented in the file __impl.h.
+ *   The C++ interface consists of the following templated functions:
+ *     int StringToInt(T* result, const char* str, unsigned base = 0)
+ *     int IntToCString(char* str, T value, uint base = 10)
+ *     std::string IntToString(T value, uint base = 10)
+ *   For more information, see simple_strconv/__impl.h.
  */
 
 #ifndef SIMPLE_STRCONV_H_
