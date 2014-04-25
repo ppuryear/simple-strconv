@@ -104,7 +104,7 @@ int StringToInt(T *result, const char* str, uint base = 0) {
     }
 
     typedef typename std::make_unsigned<T>::type uT;
-    const uT t_max = negative ? -std::numeric_limits<T>::min() :
+    const uT t_max = negative ? std::numeric_limits<T>::min() :
             std::numeric_limits<T>::max();
     const uT accum_max = t_max / base;
     const uint digit_max = t_max % base;
