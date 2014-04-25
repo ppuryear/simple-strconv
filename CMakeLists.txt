@@ -1,4 +1,4 @@
-# Copyright 2012 Philip Puryear
+# Copyright 2014 Philip Puryear
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,20 +15,9 @@
 cmake_minimum_required(VERSION 2.6)
 project(simple_strconv CXX)
 
-option(SIMPLE_STRCONV_BUILD_TESTS
-       "Build the test executable(s)." OFF)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-endif()
-
-if (SIMPLE_STRCONV_BUILD_TESTS)
-    if (APPLE)
-        add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=1)
-    endif()
-    add_subdirectory(gtest)
-    include_directories(gtest/include)
 endif()
 
 include_directories(include)

@@ -16,10 +16,3 @@ To build simple-strconv, you need the following on your system.
 *   A compiler that supports C++11.
 
 Invoke `cmake [...] <srcdir>` to generate build files for your system.
-
-If you want to build the (currently nonexistent) tests, you need to do the
-following:
-
-*   Extract the [gtest](http://code.google.com/p/googletest/) source tree into
-    a subdirectory of the simple-strconv source tree named `gtest`.
-*   Pass `-DSIMPLE_STRCONV_BUILD_TESTS=ON` to CMake.
