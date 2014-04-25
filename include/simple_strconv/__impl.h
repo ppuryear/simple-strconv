@@ -1,4 +1,4 @@
-// Copyright 2012 Philip Puryear
+// Copyright 2014 Philip Puryear
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,21 +25,28 @@ namespace simple_strconv {
 typedef unsigned int uint;
 
 const uint kMinBase = 2;
-const uint kMaxBase = 16;
+const uint kMaxBase = 36;
 
 namespace detail {
+
+// Converts \a c to its lower-case equivalent.
+inline char ToLower(char c) {
+    if (c >= 'A' && c <= 'Z')
+        return c + 'a' - 'A';
+    return c;
+}
 
 // Given an alphanumeric \a digit, returns its numeric equivalent. For example,
 // '3' becomes 3, 'c' becomes 12, 'E' becomes 14, etc. Errors are signaled via
 // return values larger than kMaxBase.
 inline uint GetNumberFromDigit(char digit) {
-    // If the digit is less than '0', the return value will wrap around, which
-    // is fine since callers that care about errors are checking that
-    // |GetNumberFromDigit() < base| anyway.
     if (digit <= '9')
-        return digit - '0';
-    // XXX: Try to explain this at some point.
-    return ((digit - 1) | (1 << 5)) - ('a' - 1) + 10;
+        return (uint) digit - '0';
+    if (digit <= 'Z')
+        return (uint) digit - 'A' + 10;
+    if (digit <= 'z')
+        return (uint) digit - 'a' + 10;
+    return (uint) -1;
 }
 
 // Given a \a number, returns its lower-case ASCII representation. For example,
@@ -50,27 +57,51 @@ inline char GetDigitFromNumber(uint number) {
     return 'a' - 10 + number;
 }
 
-// Determines the base, sign, and starting position of \a str.
-bool FixupAndClassifyString(const char*& str, uint& base);
-
 } // namespace detail
-
-#define SS_CHECK_INT_PARAM(T) \
-    static_assert(std::is_integral<T>::value, \
-            "parameter `T' must be an integral type");
 
 // Converts \a str to an integer of type \a T.
 // The semantics of this function are identical to those of the C-style
 // variants documented in simple_strconv.h.
 template<typename T>
 int StringToInt(T *result, const char* str, uint base = 0) {
-    SS_CHECK_INT_PARAM(T);
+    static_assert(std::is_integral<T>::value,
+            "parameter `T' must be an integral type");
+
     if (base != 0 && (base < kMinBase || base > kMaxBase))
         return -EINVAL;
 
-    bool negative = detail::FixupAndClassifyString(str, base);
+    bool negative = (str[0] == '-');
     if (negative && std::is_unsigned<T>::value)
         return -ERANGE;
+
+    if (negative || str[0] == '+')
+        str++;
+
+    // Detect the radix via the numeral prefix (e.g. "0x").
+    if (base == 0) {
+        if (str[0] == '0') {
+            switch (detail::ToLower(str[1])) {
+            case 'b':
+                base = 2;
+                break;
+            case 'x':
+                base = 16;
+                break;
+            default:
+                base = 8;
+                break;
+            }
+        } else {
+            base = 10;
+        }
+    }
+
+    // Advance past the numeral prefix if we have one.
+    if (str[0] == '0') {
+        char prefix = detail::ToLower(str[1]);
+        if ((base == 2 && prefix == 'b') || (base == 16 && prefix == 'x'))
+            str += 2;
+    }
 
     typedef typename std::make_unsigned<T>::type uT;
     const uT t_max = negative ? -std::numeric_limits<T>::min() :
@@ -91,7 +122,7 @@ int StringToInt(T *result, const char* str, uint base = 0) {
             if (accum > accum_max || digit > digit_max) {
                 // Check the rest of the string for invalid characters.
                 while (*++str)
-                    if (SS_UNLIKELY(detail::GetNumberFromDigit(*str) >= base))
+                    if (detail::GetNumberFromDigit(*str) >= base)
                         return -EINVAL;
                 return -ERANGE;
             }
@@ -112,7 +143,9 @@ int StringToInt(T *result, const char* str, uint base = 0) {
 //         NUL, or -EINVAL if \a base is unsupported.
 template<typename T>
 int IntToCString(char* str, T value, uint base = 10) {
-    SS_CHECK_INT_PARAM(T);
+    static_assert(std::is_integral<T>::value,
+            "parameter `T' must be an integral type");
+
     if (base < kMinBase || base > kMaxBase)
         return -EINVAL;
 
@@ -168,6 +201,5 @@ std::string IntToString(T value, uint base = 10) {
 
 } // namespace simple_strconv
 
-#undef SS_CHECK_INT_PARAM
 #undef SS_LIKELY
 #undef SS_UNLIKELY

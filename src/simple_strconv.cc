@@ -1,4 +1,4 @@
-// Copyright 2012 Philip Puryear
+// Copyright 2014 Philip Puryear
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,56 +13,6 @@
 // limitations under the License.
 
 #include "simple_strconv.h"
-
-namespace {
-
-// Converts \a c to its lower-case equivalent via ASCII bit magic.
-// Specifically, all characters of the form "10xxxxx" are converted to
-// "11xxxxx". This has a few side-effects, e.g. '@' becomes '`'.
-inline char ToLower(char c) {
-    return c | ((c & (1 << 6)) >> 1);
-}
-
-} // namespace
-
-namespace simple_strconv {
-
-namespace detail {
-
-bool FixupAndClassifyString(const char*& str, uint& base) {
-    bool negative = (str[0] == '-');
-    if (negative || str[0] == '+')
-        str++;
-
-    // Detect the radix via the numeral prefix (e.g. "0x").
-    if (base == 0) {
-        if (str[0] == '0') {
-            char indicator = ToLower(str[1]);
-            if (indicator == 'b') {
-                base = 2;
-            } else if (indicator == 'x')
-                base = 16;
-            else
-                base = 8;
-        } else {
-            base = 10;
-        }
-    }
-
-    // Advance past the numeral prefix if we have one.
-    if (str[0] == '0') {
-        char indicator = ToLower(str[1]);
-        if ((base == 2 && indicator == 'b') ||
-                (base == 16 && indicator == 'x'))
-            str += 2;
-    }
-
-    return negative;
-}
-
-} // namespace detail
-
-} // namespace simple_strconv
 
 #define DEFINE_STRTOINT_FUNC(SHORT_TYPE, TYPE) \
     int simple_strto##SHORT_TYPE(TYPE* result, const char* str, \
